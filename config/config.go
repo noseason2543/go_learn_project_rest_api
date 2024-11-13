@@ -127,7 +127,7 @@ func (c *config) Db() IDbConfig {
 }
 
 func (db *db) Url() string {
-	return fmt.Sprintf("host=%s port:%d user=%s password=%s dbname=%s sslmode=%s",
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		db.host,
 		db.port,
 		db.username,
