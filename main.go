@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go_learn_project_rest_api/config"
+	"go_learn_project_rest_api/modules/servers"
 	"go_learn_project_rest_api/pkgs/databases"
 	"os"
 )
@@ -23,4 +24,6 @@ func main() {
 	db := databases.DbConnection(cfg.Db())
 	defer db.Close()
 	fmt.Println("db connect : ", db)
+
+	servers.NewServer(cfg, db).Start()
 }

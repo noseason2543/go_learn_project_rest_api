@@ -3,6 +3,9 @@ package servers
 import (
 	"encoding/json"
 	"go_learn_project_rest_api/config"
+	"log"
+	"os"
+	"os/signal"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jmoiron/sqlx"
@@ -14,15 +17,15 @@ type IServer interface {
 }
 
 type server struct {
-	app    *fiber.App
-	db     *sqlx.DB
-	config config.IConfig
+	app *fiber.App
+	db  *sqlx.DB
+	cfg config.IConfig
 }
 
 func NewServer(cfg config.IConfig, db *sqlx.DB) IServer {
 	return &server{
-		config: cfg,
-		db:     db,
+		cfg: cfg,
+		db:  db,
 		app: fiber.New(
 			fiber.Config{
 				AppName:      cfg.App().Name(),
@@ -36,4 +39,23 @@ func NewServer(cfg config.IConfig, db *sqlx.DB) IServer {
 	}
 }
 
-func (s *server) Start() {}
+func (s *server) Start() {
+
+	//module
+	v1 := s.app.Group("v1")
+	modules := InitModule(v1, s)
+	modules.MonitorModule()
+
+	//graceful shut down
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		log.Println("server is shutting down . . .")
+		_ = s.app.Shutdown()
+	}()
+
+	// listen to host:port
+	log.Printf("server start on %v", s.cfg.App().Url())
+	s.app.Listen(s.cfg.App().Url())
+}
