@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"go_learn_project_rest_api/config"
+	"go_learn_project_rest_api/modules/entities"
 	"go_learn_project_rest_api/modules/monitor"
 
 	"github.com/gofiber/fiber/v3"
@@ -28,5 +29,5 @@ func (h *monitorHandler) HealthCheck(c fiber.Ctx) error {
 		Version: h.cfg.App().Version(),
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	return entities.NewResponse(c).SuccessResponse(fiber.StatusOK, res).Res()
 }

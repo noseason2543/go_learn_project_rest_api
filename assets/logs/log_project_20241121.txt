@@ -1,0 +1,9 @@
+{"time":"2024-11-21 15:07:01","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 16:09:32","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 16:39:19","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 16:40:21","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"trace_id":"middlewares-001","message":"router not found"}}
+{"time":"2024-11-21 16:41:50","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/asd","query":null,"body":null,"response":{"trace_id":"middlewares-001","message":"router not found"}}
+{"time":"2024-11-21 16:41:56","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 17:09:13","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 17:29:26","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
+{"time":"2024-11-21 17:33:18","ip":"127.0.0.1","method":"GET","status_code":200,"path":"/v1/","query":null,"body":null,"response":{"name":"go_learn_project_rest_api","version":"v0.1.0"}}
