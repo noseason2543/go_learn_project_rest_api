@@ -26,6 +26,6 @@
 
 # Go workspace file
 go.work
-./assets/logs
+./assets/logs/*
 
 # End of https://www.toptal.com/developers/gitignore/api/go
