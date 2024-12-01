@@ -84,10 +84,30 @@ func (f *userReq) Customer() (IInsertUser, error) {
 }
 
 func (f *userReq) Admin() (IInsertUser, error) {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	query := `
+		INSERT INTO users (
+			email,
+			username,
+			password,
+			role_id
+		) VALUES (
+			$1, $2, $3, 2
+		)
+		RETURNING id
+	`
+	if err := f.db.QueryRowContext(
+		ctx,
+		query,
+		f.req.Email,
+		f.req.Username,
+		f.req.Password,
+	).Scan(&f.id); err != nil {
+		return nil, fmt.Errorf("%v", err)
+	}
 
-	return nil, nil
+	return f, nil
 }
 
 func (f *userReq) Result() (*users.UserPassport, error) {

@@ -175,7 +175,7 @@ func (jwt *jwt) SetJwtAccessExpires(t int) { jwt.accessExpiresAt = t }
 func (jwt *jwt) SetJwtRefreshExpires(t int) { jwt.refreshExpiresAt = t }
 
 func (c *config) Jwt() IJwtConfig {
-	return nil
+	return c.jwt
 }
 
 type jwt struct {

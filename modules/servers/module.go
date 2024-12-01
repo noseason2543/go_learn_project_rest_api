@@ -51,4 +51,12 @@ func (m *moduleFactory) UsersModule() {
 
 	router := m.router.Group("/users")
 	router.Post("/signup", handlers.SignUpCustomer)
+	router.Post("/signin", handlers.SignIn)
+	router.Post("/refresh", handlers.RefreshPassport)
+	router.Post("/signout", handlers.SignOut)
+	router.Post("/signup-admin", handlers.SignUpAdmin)
+
+	router.Get("/admin/secret", handlers.GenerateAdminToken, m.mid.JwtAuth(), m.mid.Authorize(2))
+	router.Get("/profile/:user_id", handlers.GetUserProfile, m.mid.JwtAuth(), m.mid.ParamsCheck())
+
 }
