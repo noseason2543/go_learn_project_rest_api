@@ -54,11 +54,11 @@ func (m *moduleFactory) UsersModule() {
 	handlers := usersHandlers.UsersHandlers(m.server.cfg, usecase)
 
 	router := m.router.Group("/users")
-	router.Post("/signup", handlers.SignUpCustomer)
+	router.Post("/signup", handlers.SignUpCustomer, m.mid.ApiKeyAuth())
 	router.Post("/signin", handlers.SignIn, m.mid.ApiKeyAuth())
-	router.Post("/refresh", handlers.RefreshPassport)
-	router.Post("/signout", handlers.SignOut)
-	router.Post("/signup-admin", handlers.SignUpAdmin)
+	router.Post("/refresh", handlers.RefreshPassport, m.mid.ApiKeyAuth())
+	router.Post("/signout", handlers.SignOut, m.mid.ApiKeyAuth())
+	router.Post("/signup-admin", handlers.SignUpAdmin, m.mid.JwtAuth(), m.mid.Authorize(2))
 
 	router.Get("/admin/secret", handlers.GenerateAdminToken, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Get("/profile/:user_id", handlers.GetUserProfile, m.mid.JwtAuth(), m.mid.ParamsCheck())
@@ -74,4 +74,5 @@ func (m *moduleFactory) AppInfoModule() {
 	router := m.router.Group("/appinfo")
 
 	router.Get("/apikey", handlers.GenerateApiKey, m.mid.JwtAuth(), m.mid.Authorize(2))
+	router.Get("/category", handlers.FindCategory, m.mid.ApiKeyAuth())
 }
