@@ -49,6 +49,7 @@ func (s *server) Start() {
 	modules := InitModule(v1, s, middlewares)
 	modules.MonitorModule()
 	modules.UsersModule()
+	modules.AppInfoModule()
 
 	s.app.Use(middlewares.RouterCheck())
 	//graceful shut down

@@ -1,7 +1,6 @@
 package usersHandlers
 
 import (
-	"fmt"
 	"go_learn_project_rest_api/config"
 	"go_learn_project_rest_api/modules/entities"
 	"go_learn_project_rest_api/modules/users"
@@ -129,7 +128,7 @@ func (h *usersHandlers) SignIn(c fiber.Ctx) error {
 
 func (h *usersHandlers) RefreshPassport(c fiber.Ctx) error {
 	req := new(users.UserRefreshCredential)
-	fmt.Println("qwe: ", string(c.Body()))
+
 	if err := c.Bind().Body(&req); err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.StatusBadRequest,

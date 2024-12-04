@@ -1,6 +1,9 @@
 package servers
 
 import (
+	"go_learn_project_rest_api/modules/appInfo/appInfoHandlers"
+	"go_learn_project_rest_api/modules/appInfo/appInfoRepositories"
+	"go_learn_project_rest_api/modules/appInfo/appInfoUsecases"
 	middlewaresHandler "go_learn_project_rest_api/modules/middlewares/middlewaresHandlers"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresRepository"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresUsecases"
@@ -15,6 +18,7 @@ import (
 type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
+	AppInfoModule()
 }
 
 type moduleFactory struct {
@@ -51,7 +55,7 @@ func (m *moduleFactory) UsersModule() {
 
 	router := m.router.Group("/users")
 	router.Post("/signup", handlers.SignUpCustomer)
-	router.Post("/signin", handlers.SignIn)
+	router.Post("/signin", handlers.SignIn, m.mid.ApiKeyAuth())
 	router.Post("/refresh", handlers.RefreshPassport)
 	router.Post("/signout", handlers.SignOut)
 	router.Post("/signup-admin", handlers.SignUpAdmin)
@@ -59,4 +63,15 @@ func (m *moduleFactory) UsersModule() {
 	router.Get("/admin/secret", handlers.GenerateAdminToken, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Get("/profile/:user_id", handlers.GetUserProfile, m.mid.JwtAuth(), m.mid.ParamsCheck())
 
+}
+
+func (m *moduleFactory) AppInfoModule() {
+	repository := appInfoRepositories.AppInfoRepository(m.server.db)
+	usecase := appInfoUsecases.AppInfoUsecases(repository)
+	handlers := appInfoHandlers.AppInfoHandler(m.server.cfg, usecase)
+	_ = handlers
+
+	router := m.router.Group("/appinfo")
+
+	router.Get("/apikey", handlers.GenerateApiKey, m.mid.JwtAuth(), m.mid.Authorize(2))
 }
