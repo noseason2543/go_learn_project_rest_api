@@ -4,6 +4,8 @@ import (
 	"go_learn_project_rest_api/modules/appInfo/appInfoHandlers"
 	"go_learn_project_rest_api/modules/appInfo/appInfoRepositories"
 	"go_learn_project_rest_api/modules/appInfo/appInfoUsecases"
+	"go_learn_project_rest_api/modules/files/fileHandlers"
+	"go_learn_project_rest_api/modules/files/fileUsecases"
 	middlewaresHandler "go_learn_project_rest_api/modules/middlewares/middlewaresHandlers"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresRepository"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresUsecases"
@@ -19,6 +21,7 @@ type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
 	AppInfoModule()
+	FilesModule()
 }
 
 type moduleFactory struct {
@@ -69,10 +72,20 @@ func (m *moduleFactory) AppInfoModule() {
 	repository := appInfoRepositories.AppInfoRepository(m.server.db)
 	usecase := appInfoUsecases.AppInfoUsecases(repository)
 	handlers := appInfoHandlers.AppInfoHandler(m.server.cfg, usecase)
-	_ = handlers
 
 	router := m.router.Group("/appinfo")
 
 	router.Get("/apikey", handlers.GenerateApiKey, m.mid.JwtAuth(), m.mid.Authorize(2))
+	router.Post("/insertcategory", handlers.InsertCategory, m.mid.JwtAuth(), m.mid.Authorize(2))
+	router.Post("/deletecategory", handlers.DeleteCategory, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Get("/category", handlers.FindCategory, m.mid.ApiKeyAuth())
+}
+
+func (m *moduleFactory) FilesModule() {
+	usecase := fileUsecases.FileUsecases(m.server.cfg)
+	handlers := fileHandlers.FileHandlers(m.server.cfg, usecase)
+
+	_ = handlers
+	router := m.router.Group("/files")
+	_ = router
 }

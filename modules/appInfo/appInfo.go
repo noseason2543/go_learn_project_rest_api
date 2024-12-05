@@ -7,3 +7,7 @@ type Category struct {
 	Id    int    `db:"id" json:"id"`
 	Title string `db:"title" json:"title"`
 }
+
+type RequestCategoryId struct {
+	Id int `json:"category_id"`
+}
