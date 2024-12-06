@@ -3,8 +3,8 @@ package files
 import "mime/multipart"
 
 type FileReq struct {
-	File        *multipart.File `form:"file"`
-	Destination string          `form:"destination"`
+	File        *multipart.FileHeader `form:"file"`
+	Destination string                `form:"destination"`
 	Extension   string
 	FileName    string
 }
