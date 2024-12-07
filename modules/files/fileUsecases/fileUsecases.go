@@ -14,7 +14,7 @@ import (
 
 type IFileUsecases interface {
 	UploadToGCP([]*files.FileReq) ([]*files.FileRes, error)
-	streamFileUpload(context.Context, *storage.Client, <-chan *files.FileReq, chan<- *files.FileRes, chan<- error)
+	DeleteFileOnGCP([]*files.DeleteFileReq) error
 }
 
 type fileUsecases struct {
@@ -128,4 +128,60 @@ func (f *filesPub) setPublicACL(ctx context.Context, client *storage.Client) err
 
 	}
 	return nil
+}
+
+func (u *fileUsecases) DeleteFileOnGCP(req []*files.DeleteFileReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("storage.NewClient : %v", err)
+	}
+	defer client.Close()
+
+	jobsCh := make(chan *files.DeleteFileReq, len(req))
+	errCh := make(chan error, len(req))
+
+	for _, r := range req {
+		jobsCh <- r
+	}
+	close(jobsCh)
+
+	numWorker := 5
+	for i := 0; i < numWorker; i++ {
+		go u.deleteFile(ctx, client, jobsCh, errCh)
+	}
+
+	for a := 0; a < len(req); a++ {
+		err := <-errCh
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// deleteFile removes specified object.
+func (u *fileUsecases) deleteFile(ctx context.Context, client *storage.Client, jobs <-chan *files.DeleteFileReq, errs chan<- error) {
+	for job := range jobs {
+		o := client.Bucket(u.cfg.App().GCPBucket()).Object(job.Destination + job.FileName)
+
+		// Optional: set a generation-match precondition to avoid potential race
+		// conditions and data corruptions. The request to delete the file is aborted
+		// if the object's generation number does not match your precondition.
+		attrs, err := o.Attrs(ctx)
+		if err != nil {
+			errs <- fmt.Errorf("object.Attrs: %w", err)
+			return
+		}
+		o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
+		if err := o.Delete(ctx); err != nil {
+			errs <- fmt.Errorf("Object(%q).Delete: %w", job.Destination+job.FileName, err)
+		}
+		fmt.Printf("Blob %v deleted.\n", job.Destination+job.FileName)
+		errs <- nil
+	}
 }
