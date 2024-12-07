@@ -51,6 +51,7 @@ func (s *server) Start() {
 	modules.UsersModule()
 	modules.AppInfoModule()
 	modules.FilesModule()
+	modules.ProductModule()
 
 	s.app.Use(middlewares.RouterCheck())
 	//graceful shut down
