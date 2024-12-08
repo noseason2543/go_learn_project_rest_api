@@ -57,3 +57,11 @@ func (res *Response) Res() error {
 		return &res.Data
 	}())
 }
+
+type PaginateRes struct {
+	Data      any `json:"data"`
+	Page      int `json:"page"`
+	Limit     int `json:"limit"`
+	TotalPage int `json:"total_page"`
+	TotalItem int `json:"total_item"`
+}

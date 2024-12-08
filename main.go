@@ -17,7 +17,6 @@ func envPath() string {
 }
 
 func main() {
-	fmt.Println("hello world")
 	cfg := config.LoadConfig(envPath())
 	fmt.Println(cfg.App().Url())
 

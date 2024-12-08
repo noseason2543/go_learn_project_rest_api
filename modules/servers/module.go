@@ -100,7 +100,7 @@ func (m *moduleFactory) ProductModule() {
 	usecase := productUsecases.ProductUsecases(repository)
 	handlers := productHandlers.ProductHandler(usecase, m.server.cfg, fileUsecase)
 
-	router := m.router.Group("/product")
-	_ = handlers
-	_ = router
+	router := m.router.Group("/products")
+	router.Get("/", handlers.FindProduct, m.mid.ApiKeyAuth())
+	router.Get("/:product_id", handlers.FindOneProduct, m.mid.ApiKeyAuth())
 }
