@@ -46,7 +46,7 @@ func FindProductBuilder(db *sqlx.DB, req *products.ProductFilter) IFindProductBu
 func (b *findProductBuilder) openJsonQuery() {
 	b.query += `
         SELECT 
-            array_to_json(array_agg(t))
+            json_agg(t)
         FROM (
     `
 }

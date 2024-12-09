@@ -101,6 +101,7 @@ func (m *moduleFactory) ProductModule() {
 	handlers := productHandlers.ProductHandler(usecase, m.server.cfg, fileUsecase)
 
 	router := m.router.Group("/products")
+	router.Post("/addProduct", handlers.AddProduct, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Get("/", handlers.FindProduct, m.mid.ApiKeyAuth())
 	router.Get("/:product_id", handlers.FindOneProduct, m.mid.ApiKeyAuth())
 }
