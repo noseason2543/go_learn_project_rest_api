@@ -1,6 +1,7 @@
 package productRepositories
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"go_learn_project_rest_api/config"
@@ -16,6 +17,8 @@ type IProductRepository interface {
 	FindOneProduct(string) (*products.Product, error)
 	FindProduct(*products.ProductFilter) ([]*products.Product, int)
 	InsertProduct(*products.Product) (*products.Product, error)
+	UpdateProduct(*products.Product) (*products.Product, error)
+	DeleteProduct(string) error
 }
 
 type productRepository struct {
@@ -109,4 +112,40 @@ func (r *productRepository) InsertProduct(req *products.Product) (*products.Prod
 		return nil, err
 	}
 	return product, nil
+}
+
+func (r *productRepository) UpdateProduct(req *products.Product) (*products.Product, error) {
+	builder := productPatterns.UpdateProductBuilder(r.db, req, r.fileUsecases)
+	engineer := productPatterns.UpdateProductEngineer(builder)
+
+	if err := engineer.UpdateProduct(); err != nil {
+		return nil, err
+	}
+
+	product, err := r.FindOneProduct(req.Id)
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (r *productRepository) DeleteProduct(productId string) error {
+	ctx := context.Background()
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	query := `DELETE FROM products WHERE id = $1;`
+
+	if _, err := tx.ExecContext(ctx, query, productId); err != nil {
+		tx.Rollback()
+		return fmt.Errorf("delete product failed: %v", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
 }
