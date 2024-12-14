@@ -10,6 +10,9 @@ import (
 	"go_learn_project_rest_api/modules/middlewares/middlewaresRepository"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresUsecases"
 	"go_learn_project_rest_api/modules/monitor/handlers"
+	"go_learn_project_rest_api/modules/orders/orderHandlers"
+	"go_learn_project_rest_api/modules/orders/orderRepositories"
+	"go_learn_project_rest_api/modules/orders/orderUsecases"
 	"go_learn_project_rest_api/modules/products/productHandlers"
 	"go_learn_project_rest_api/modules/products/productRepositories"
 	"go_learn_project_rest_api/modules/products/productUsecases"
@@ -26,6 +29,7 @@ type IModuleFactory interface {
 	AppInfoModule()
 	FilesModule()
 	ProductModule()
+	OrderModule()
 }
 
 type moduleFactory struct {
@@ -107,4 +111,16 @@ func (m *moduleFactory) ProductModule() {
 	router.Get("/:product_id", handlers.FindOneProduct, m.mid.ApiKeyAuth())
 
 	router.Delete("/:product_id", handlers.DeleteProduct, m.mid.JwtAuth(), m.mid.Authorize(2))
+}
+
+func (m *moduleFactory) OrderModule() {
+	fileUsecase := fileUsecases.FileUsecases(m.server.cfg)
+	productRepository := productRepositories.ProductRepository(m.server.db, m.server.cfg, fileUsecase)
+	repository := orderRepositories.OrderRepository(m.server.db)
+	usecase := orderUsecases.OrderUsecases(repository, productRepository)
+	handlers := orderHandlers.OrderHandlers(m.server.cfg, usecase)
+
+	router := m.router.Group("/orders")
+	_ = router
+	_ = handlers
 }
