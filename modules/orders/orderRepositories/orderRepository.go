@@ -1,10 +1,12 @@
 package orderRepositories
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"go_learn_project_rest_api/modules/orders"
 	"go_learn_project_rest_api/modules/orders/orderPatterns"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -12,6 +14,8 @@ import (
 type IOrderRepository interface {
 	FindOneOrder(string) (*orders.Order, error)
 	FindOrder(*orders.OrderFilter) ([]*orders.Order, int)
+	InsertOrder(*orders.Order) (string, error)
+	UpdateOrder(*orders.Order) error
 }
 
 type orderRepository struct {
@@ -79,4 +83,59 @@ func (r *orderRepository) FindOrder(req *orders.OrderFilter) ([]*orders.Order, i
 	builder := orderPatterns.FindOrderBuilder(r.db, req)
 	engineer := orderPatterns.FindOrderEngineer(builder)
 	return engineer.FindOrder(), engineer.CountOrder()
+}
+
+func (r *orderRepository) InsertOrder(req *orders.Order) (string, error) {
+	builder := orderPatterns.InsertOrderBuilder(r.db, req)
+	orderId, err := orderPatterns.InsertOrderEngineer(builder).InsertOrder()
+	if err != nil {
+		return "", err
+	}
+	return orderId, nil
+}
+
+func (r *orderRepository) UpdateOrder(req *orders.Order) error {
+	query := `
+	UPDATE "orders" SET`
+
+	queryWhereStack := make([]string, 0)
+	values := make([]any, 0)
+	lastIndex := 1
+
+	if req.Status != "" {
+		values = append(values, req.Status)
+
+		queryWhereStack = append(queryWhereStack, fmt.Sprintf(`
+		"status" = $%d?`, lastIndex))
+
+		lastIndex++
+	}
+
+	if req.TransferSlip != nil {
+		values = append(values, req.TransferSlip)
+
+		queryWhereStack = append(queryWhereStack, fmt.Sprintf(`
+		"transfer_slip" = $%d?`, lastIndex))
+
+		lastIndex++
+	}
+
+	values = append(values, req.Id)
+
+	queryClose := fmt.Sprintf(`
+	WHERE "id" = $%d;`, lastIndex)
+
+	for i := range queryWhereStack {
+		if i != len(queryWhereStack)-1 {
+			query += strings.Replace(queryWhereStack[i], "?", ",", 1)
+		} else {
+			query += strings.Replace(queryWhereStack[i], "?", "", 1)
+		}
+	}
+	query += queryClose
+
+	if _, err := r.db.ExecContext(context.Background(), query, values...); err != nil {
+		return fmt.Errorf("update order failed: %v", err)
+	}
+	return nil
 }

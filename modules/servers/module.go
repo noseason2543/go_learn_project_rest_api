@@ -122,5 +122,7 @@ func (m *moduleFactory) OrderModule() {
 
 	router := m.router.Group("/orders")
 	router.Get("/", handlers.FindOrder, m.mid.JwtAuth(), m.mid.Authorize(2))
+	router.Post("/", handlers.InsertOrder, m.mid.JwtAuth())
 	router.Get("/:user_id/:order_id", handlers.FindOneOrder, m.mid.JwtAuth(), m.mid.ParamsCheck())
+	router.Patch("/:user_id/:order_id", handlers.UpdateOrder, m.mid.JwtAuth(), m.mid.ParamsCheck())
 }
