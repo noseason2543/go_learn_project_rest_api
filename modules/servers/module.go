@@ -4,7 +4,6 @@ import (
 	"go_learn_project_rest_api/modules/appInfo/appInfoHandlers"
 	"go_learn_project_rest_api/modules/appInfo/appInfoRepositories"
 	"go_learn_project_rest_api/modules/appInfo/appInfoUsecases"
-	"go_learn_project_rest_api/modules/files/fileHandlers"
 	"go_learn_project_rest_api/modules/files/fileUsecases"
 	middlewaresHandler "go_learn_project_rest_api/modules/middlewares/middlewaresHandlers"
 	"go_learn_project_rest_api/modules/middlewares/middlewaresRepository"
@@ -13,9 +12,7 @@ import (
 	"go_learn_project_rest_api/modules/orders/orderHandlers"
 	"go_learn_project_rest_api/modules/orders/orderRepositories"
 	"go_learn_project_rest_api/modules/orders/orderUsecases"
-	"go_learn_project_rest_api/modules/products/productHandlers"
 	"go_learn_project_rest_api/modules/products/productRepositories"
-	"go_learn_project_rest_api/modules/products/productUsecases"
 	"go_learn_project_rest_api/modules/users/usersHandlers"
 	"go_learn_project_rest_api/modules/users/usersRepositories"
 	"go_learn_project_rest_api/modules/users/usersUsecases"
@@ -27,8 +24,8 @@ type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
 	AppInfoModule()
-	FilesModule()
-	ProductModule()
+	FilesModule() IFilesModule
+	ProductModule() IProductsModule
 	OrderModule()
 }
 
@@ -87,30 +84,6 @@ func (m *moduleFactory) AppInfoModule() {
 	router.Post("/insertcategory", handlers.InsertCategory, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Post("/deletecategory", handlers.DeleteCategory, m.mid.JwtAuth(), m.mid.Authorize(2))
 	router.Get("/category", handlers.FindCategory, m.mid.ApiKeyAuth())
-}
-
-func (m *moduleFactory) FilesModule() {
-	usecase := fileUsecases.FileUsecases(m.server.cfg)
-	handlers := fileHandlers.FileHandlers(m.server.cfg, usecase)
-
-	router := m.router.Group("/files")
-	router.Post("/upload", handlers.UploadFiles, m.mid.JwtAuth(), m.mid.Authorize(2))
-	router.Post("/delete", handlers.DeleteFile, m.mid.JwtAuth(), m.mid.Authorize(2))
-}
-
-func (m *moduleFactory) ProductModule() {
-	fileUsecase := fileUsecases.FileUsecases(m.server.cfg)
-	repository := productRepositories.ProductRepository(m.server.db, m.server.cfg, fileUsecase)
-	usecase := productUsecases.ProductUsecases(repository)
-	handlers := productHandlers.ProductHandler(usecase, m.server.cfg, fileUsecase)
-
-	router := m.router.Group("/products")
-	router.Post("/addProduct", handlers.AddProduct, m.mid.JwtAuth(), m.mid.Authorize(2))
-	router.Patch("/:product_id", handlers.UpdateProduct, m.mid.JwtAuth(), m.mid.Authorize(2))
-	router.Get("/", handlers.FindProduct, m.mid.ApiKeyAuth())
-	router.Get("/:product_id", handlers.FindOneProduct, m.mid.ApiKeyAuth())
-
-	router.Delete("/:product_id", handlers.DeleteProduct, m.mid.JwtAuth(), m.mid.Authorize(2))
 }
 
 func (m *moduleFactory) OrderModule() {
